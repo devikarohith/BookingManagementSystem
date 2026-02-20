@@ -1,0 +1,25 @@
+﻿@model DevikaBookingManagement.Models.BookingModel
+
+<table>
+    <tr>
+        <td>Name</td>
+        <td>Amount</td>
+   
+    @foreach(var item in Model.Bookings)
+        {
+        <tr>
+            <td>
+                @item.Name
+            </td>
+            <td>@item.Amount
+
+            </td>
+            <td>
+                <button>Complete</button>
+            </td>
+        </tr>
+        }
+    
+
+    </tr>
+</table>

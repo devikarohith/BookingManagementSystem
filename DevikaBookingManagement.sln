@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevikaBookingManagement", "DevikaBookingManagement\DevikaBookingManagement.csproj", "{7E45889A-BE06-4056-B822-15ED66BD6533}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingManagementBLL", "BookingManagementBLL\BookingManagementBLL.csproj", "{E17A28F4-6853-4250-8B34-F5A0F25D5D2F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingManagementDAL", "BookingManagementDAL\BookingManagementDAL.csproj", "{A8F79652-0210-4FD5-B4D7-32D9C2244AC0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7E45889A-BE06-4056-B822-15ED66BD6533}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E45889A-BE06-4056-B822-15ED66BD6533}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E45889A-BE06-4056-B822-15ED66BD6533}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E45889A-BE06-4056-B822-15ED66BD6533}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E17A28F4-6853-4250-8B34-F5A0F25D5D2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E17A28F4-6853-4250-8B34-F5A0F25D5D2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E17A28F4-6853-4250-8B34-F5A0F25D5D2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E17A28F4-6853-4250-8B34-F5A0F25D5D2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8F79652-0210-4FD5-B4D7-32D9C2244AC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8F79652-0210-4FD5-B4D7-32D9C2244AC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8F79652-0210-4FD5-B4D7-32D9C2244AC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8F79652-0210-4FD5-B4D7-32D9C2244AC0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

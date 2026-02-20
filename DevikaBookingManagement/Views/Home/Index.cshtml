@@ -1,0 +1,30 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script>
+    $(document).ready(function () {
+        fnLoadReservations();
+    });
+    function fnLoadReservations() {
+        $.ajax({
+            url: '/Home/ReservationList',
+            contentType: 'application/html; charset=utf-8',
+            type: 'GET',
+            dataType: 'html'
+
+        })
+        .done(function (result) {
+            $('#dvReservatioList').html(result);
+        })
+            .fail(function (xhr, status) {
+                alert(status);
+            });
+    }
+</script>
+
+<div id="dvReservatioList">
+
+</div>
