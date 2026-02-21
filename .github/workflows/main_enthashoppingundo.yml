@@ -24,20 +24,19 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore DevikaBookingManagement.sln
 
-      # ✅ Build entire solution
       - name: Build Solution
         run: msbuild DevikaBookingManagement.sln /p:Configuration=Release
 
-      # ✅ Publish ONLY Web Project
+      # ✅ Publish to guaranteed workspace folder
       - name: Publish Web Project
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=published
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl="${{ github.workspace }}\published"
 
-      # ✅ Upload published files
+      # ✅ Upload artifact (corrected)
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: ASP-app
-          path: ./published
+          path: ${{ github.workspace }}/published
 
   deploy:
     runs-on: windows-latest
