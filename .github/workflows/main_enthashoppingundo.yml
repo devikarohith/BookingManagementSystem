@@ -14,34 +14,28 @@ jobs:
       contents: read
 
     steps:
-      # Checkout code
       - uses: actions/checkout@v4
 
-      # Setup MSBuild
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.0.2
 
-      # Setup NuGet
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1.0.5
 
-      # Restore packages
       - name: Restore NuGet packages
         run: nuget restore DevikaBookingManagement.sln
 
-      # Build solution
       - name: Build Solution
         run: msbuild DevikaBookingManagement.sln /p:Configuration=Release
 
-      # Publish Web Project
-      - name: Publish Web Project
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj `
-              /p:Configuration=Release `
-              /p:DeployOnBuild=true `
-              /p:WebPublishMethod=FileSystem `
-              /p:PublishUrl=published
+      # 🔹 Create publish directory manually
+      - name: Create publish folder
+        run: mkdir published
 
-      # Login to Azure
+      # 🔹 Publish web project into root published folder
+      - name: Publish Web Project
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=${{ github.workspace }}\published
+
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -49,9 +43,8 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B1031CB56AFC4975873A8B3CE92DC7AC }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3326E556FC4A4EFABA5C07FCE65E7B42 }}
 
-      # Deploy to Azure Web App
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'enthashoppingundo'
-          package: published
+          package: published/**
