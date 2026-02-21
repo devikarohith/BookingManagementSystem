@@ -25,20 +25,25 @@ jobs:
         uses: NuGet/setup-nuget@v1
 
       - name: Restore NuGet packages
-        run: nuget restore
+        run: nuget restore DevikaBookingManagement/DevikaBookingManagement.sln
 
-      # 🔥 Publish directly from Web project
+      # ✅ Publish directly from Web project
       - name: Publish Web Project
         run: |
-          msbuild DevikaBookingManagement/DevikaBookingManagement.csproj `
-          /p:Configuration=Release `
-          /p:DeployOnBuild=true `
-          /p:WebPublishMethod=FileSystem `
-          /p:PublishUrl=publish `
-          /p:DeleteExistingFiles=true
+          msbuild DevikaBookingManagement/DevikaBookingManagement.csproj ^
+            /p:Configuration=Release ^
+            /p:DeployOnBuild=true ^
+            /p:WebPublishMethod=FileSystem ^
+            /p:PublishUrl=$(System.DefaultWorkingDirectory)\publish ^
+            /p:DeleteExistingFiles=true
 
       - name: Show Publish Folder
-        run: dir publish
+        run: |
+          if (Test-Path publish) {
+            dir publish
+          } else {
+            Write-Host "Publish folder not found."
+          }
 
       - name: Azure Login
         uses: azure/login@v2
