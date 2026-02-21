@@ -25,16 +25,20 @@ jobs:
         uses: NuGet/setup-nuget@v1
 
       - name: Restore NuGet packages
-        run: nuget restore DevikaBookingManagement.sln
+        run: nuget restore
 
-      - name: Build Solution
-        run: msbuild DevikaBookingManagement.sln /p:Configuration=Release
-
+      # 🔥 Publish directly from Web project
       - name: Publish Web Project
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:DeleteExistingFiles=true /p:PublishUrl=${{ github.workspace }}\publish
+        run: |
+          msbuild DevikaBookingManagement/DevikaBookingManagement.csproj `
+          /p:Configuration=Release `
+          /p:DeployOnBuild=true `
+          /p:WebPublishMethod=FileSystem `
+          /p:PublishUrl=publish `
+          /p:DeleteExistingFiles=true
 
       - name: Show Publish Folder
-        run: dir "${{ github.workspace }}\publish"
+        run: dir publish
 
       - name: Azure Login
         uses: azure/login@v2
@@ -47,4 +51,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: enthashoppingundo
-          package: ${{ github.workspace }}\publish
+          package: publish
