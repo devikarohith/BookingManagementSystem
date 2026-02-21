@@ -1,4 +1,4 @@
-name: Build and deploy ASP app to Azure Web App - enthashoppingundo
+name: Build and deploy ASP.NET MVC to Azure Web App
 
 on:
   push:
@@ -9,18 +9,15 @@ on:
 jobs:
   build-and-deploy:
     runs-on: windows-latest
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.0.2
+        uses: microsoft/setup-msbuild@v1.1
 
       - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1.0.5
+        uses: NuGet/setup-nuget@v1
 
       - name: Restore NuGet packages
         run: nuget restore DevikaBookingManagement.sln
@@ -28,23 +25,23 @@ jobs:
       - name: Build Solution
         run: msbuild DevikaBookingManagement.sln /p:Configuration=Release
 
-      # 🔹 Create publish directory manually
-      - name: Create publish folder
-        run: mkdir published
-
-      # 🔹 Publish web project into root published folder
       - name: Publish Web Project
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=${{ github.workspace }}\published
+        run: |
+          msbuild DevikaBookingManagement/DevikaBookingManagement.csproj ^
+          /p:DeployOnBuild=true ^
+          /p:WebPublishMethod=FileSystem ^
+          /p:PublishUrl=${{ github.workspace }}\publish ^
+          /p:Configuration=Release
 
       - name: Azure Login
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_665AAC9768764F6AA8CE3E2842F43BEB }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B1031CB56AFC4975873A8B3CE92DC7AC }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3326E556FC4A4EFABA5C07FCE65E7B42 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_XXXXX }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_XXXXX }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_XXXXX }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'enthashoppingundo'
-          package: published/**
+          app-name: enthashoppingundo
+          package: publish
