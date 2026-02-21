@@ -7,60 +7,51 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: windows-latest
-    permissions:
-      contents: read
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup MSBuild path
-        uses: microsoft/setup-msbuild@v1.0.2
-
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1.0.5
-
-      - name: Restore NuGet packages
-        run: nuget restore DevikaBookingManagement.sln
-
-      - name: Build Solution
-        run: msbuild DevikaBookingManagement.sln /p:Configuration=Release
-
-      # ✅ Publish Web Project into project folder
-      - name: Publish Web Project
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=DevikaBookingManagement/published
-
-      # ✅ Upload correct publish folder
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: ASP-app
-          path: DevikaBookingManagement/published
-
-  deploy:
-    runs-on: windows-latest
-    needs: build
     permissions:
       id-token: write
       contents: read
 
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: ASP-app
+      # Checkout code
+      - uses: actions/checkout@v4
 
-      - name: Login to Azure
+      # Setup MSBuild
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      # Setup NuGet
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1.0.5
+
+      # Restore packages
+      - name: Restore NuGet packages
+        run: nuget restore DevikaBookingManagement.sln
+
+      # Build solution
+      - name: Build Solution
+        run: msbuild DevikaBookingManagement.sln /p:Configuration=Release
+
+      # Publish Web Project
+      - name: Publish Web Project
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj `
+              /p:Configuration=Release `
+              /p:DeployOnBuild=true `
+              /p:WebPublishMethod=FileSystem `
+              /p:PublishUrl=published
+
+      # Login to Azure
+      - name: Azure Login
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_665AAC9768764F6AA8CE3E2842F43BEB }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B1031CB56AFC4975873A8B3CE92DC7AC }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3326E556FC4A4EFABA5C07FCE65E7B42 }}
 
+      # Deploy to Azure Web App
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'enthashoppingundo'
-          slot-name: 'Production'
-          package: .
+          package: published
