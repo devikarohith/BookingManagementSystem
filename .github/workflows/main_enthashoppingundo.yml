@@ -42,4 +42,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: enthashoppingundo
-          package: "${{ github.workspace }}\site.zip"
+          package: "${{ github.workspace }}/site.zip"
+
