@@ -30,7 +30,7 @@ jobs:
 
       # ✅ Publish to a folder (avoids missing .pubxml issue)
       - name: Publish Web Project
-        run: msbuild BookingManagementSystem/DevikaBookingManagement/DevikaBookingManagement.csproj
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj
 
       - name: Show Publish Folder
         run: |
@@ -52,4 +52,5 @@ jobs:
         with:
           app-name: enthashoppingundo
           package: publish
+
 
