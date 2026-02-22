@@ -28,7 +28,11 @@ jobs:
         run: nuget restore DevikaBookingManagement.sln
 
       - name: Publish Web Project
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile="enthashoppingundo - Web Deploy"
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj ^
+           /p:Configuration=Release ^
+           /p:DeployOnBuild=true ^
+           /p:PublishProfile="enthashoppingundo - Web Deploy" ^
+           /p:ExcludeFilesFromDeployment="*.pubxml.user"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -63,4 +67,5 @@ jobs:
           app-name: enthashoppingundo
           slot-name: Production
           package: ASP-app
+
 
