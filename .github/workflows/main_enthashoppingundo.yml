@@ -35,12 +35,12 @@ jobs:
         run: msbuild DevikaBookingManagement.sln /p:Configuration=Release
 
       # ✅ Publish using the Visual Studio publish profile
-       - name: Publish Web Project
-  run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj ^
-       /p:Configuration=Release ^
-       /p:DeployOnBuild=true ^
-       /p:PublishProfile="enthashoppingundo - Web Deploy" ^
-       /p:ExcludeFilesFromDeployment="enthashoppingundo - Web Deploy.pubxml.user"
+      - name: Publish Web Project
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj ^
+               /p:Configuration=Release ^
+               /p:DeployOnBuild=true ^
+               /p:PublishProfile="enthashoppingundo - Web Deploy" ^
+               /p:ExcludeFilesFromDeployment="enthashoppingundo - Web Deploy.pubxml.user"
 
       # Verify publish folder
       - name: Verify Publish Folder
