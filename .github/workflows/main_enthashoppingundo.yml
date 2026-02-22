@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.1
+        uses: microsoft/setup-msbuild@v2
 
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
@@ -27,15 +27,20 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore DevikaBookingManagement.sln
 
-      - name: Build Solution
-        run: msbuild DevikaBookingManagement.sln /p:Configuration=Release
+      # ✅ 1. Build and Publish to a local folder (NOT a Web Deploy Package)
+      - name: Publish Web App
+        run: |
+          msbuild DevikaBookingManagement/DevikaBookingManagement.csproj `
+          /p:Configuration=Release `
+          /p:DeployOnBuild=true `
+          /p:PublishUrl="${{ github.workspace }}\publish" `
+          /p:WebPublishMethod=FileSystem `
+          /p:PackageAsSingleFile=false `
+          /p:SkipInvalidConfigurations=true
 
-      # ✅ Create MSBuild Web Deploy package (NO pubxml needed)
-      - name: Create Web Package
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="${{ github.workspace }}\site.zip"
-
-      - name: Verify ZIP
-        run: dir "${{ github.workspace }}\site.zip"
+      # ✅ 2. ZIP the published folder manually (This creates the correct format)
+      - name: Create ZIP Archive
+        run: Compress-Archive -Path "${{ github.workspace }}\publish\*" -DestinationPath "${{ github.workspace }}\site.zip" -Force
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -44,8 +49,10 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B1031CB56AFC4975873A8B3CE92DC7AC }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3326E556FC4A4EFABA5C07FCE65E7B42 }}
 
+      # ✅ 3. Deploy the clean ZIP
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: enthashoppingundo
-          package: "${{ github.workspace }}\\site.zip"
+          package: "${{ github.workspace }}\site.zip"
+          slot-name: production
