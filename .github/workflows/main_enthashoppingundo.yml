@@ -27,8 +27,8 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore DevikaBookingManagement.sln
 
-      - name: Publish to folder
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /nologo /verbosity:m /p:Configuration=Release /t:pipelinePreDeployCopyAllFilesToOneFolder /p:_PackageTempDir="published"
+      - name: Publish Web Project
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile="enthashoppingundo - Web Deploy"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -63,3 +63,4 @@ jobs:
           app-name: enthashoppingundo
           slot-name: Production
           package: ASP-app
+
