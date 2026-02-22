@@ -10,6 +10,10 @@ jobs:
   build-and-deploy:
     runs-on: windows-latest
 
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,14 +24,21 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
 
+      # ✅ Restore packages using the solution file
       - name: Restore NuGet packages
         run: nuget restore DevikaBookingManagement.sln
 
+      # ✅ Publish to a folder (avoids missing .pubxml issue)
       - name: Publish Web Project
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile="enthashoppingundo - Web Deploy"
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=publish /p:DeleteExistingFiles=true
 
       - name: Show Publish Folder
-        run: dir DevikaBookingManagement/bin/Release/Publish
+        run: |
+          if (Test-Path publish) {
+            dir publish
+          } else {
+            Write-Host "Publish folder not found."
+          }
 
       - name: Azure Login
         uses: azure/login@v2
@@ -40,4 +51,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: enthashoppingundo
-          package: DevikaBookingManagement/bin/Release/Publish
+          package: publish
