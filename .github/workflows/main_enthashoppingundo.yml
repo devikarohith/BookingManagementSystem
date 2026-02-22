@@ -1,4 +1,4 @@
-name: Build and Deploy ASP.NET MVC to Azure Web App
+name: Build and Deploy
 
 on:
   push:
@@ -7,16 +7,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: windows-latest
-
     permissions:
       id-token: write
       contents: read
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
@@ -24,35 +22,24 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
 
-      - name: Restore NuGet packages
+      - name: Restore
         run: nuget restore DevikaBookingManagement.sln
 
-      # ✅ 1. Build and Publish to a local folder (NOT a Web Deploy Package)
-      - name: Publish Web App
-        run: |
-          msbuild DevikaBookingManagement/DevikaBookingManagement.csproj `
-          /p:Configuration=Release `
-          /p:DeployOnBuild=true `
-          /p:PublishUrl="${{ github.workspace }}\publish" `
-          /p:WebPublishMethod=FileSystem `
-          /p:PackageAsSingleFile=false `
-          /p:SkipInvalidConfigurations=true
+      - name: Publish
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishUrl="${{ github.workspace }}\publish" /p:WebPublishMethod=FileSystem /p:PackageAsSingleFile=false
 
-      # ✅ 2. ZIP the published folder manually (This creates the correct format)
-      - name: Create ZIP Archive
+      - name: Archive
         run: Compress-Archive -Path "${{ github.workspace }}\publish\*" -DestinationPath "${{ github.workspace }}\site.zip" -Force
 
-      - name: Login to Azure
+      - name: Login
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_665AAC9768764F6AA8CE3E2842F43BEB }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B1031CB56AFC4975873A8B3CE92DC7AC }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3326E556FC4A4EFABA5C07FCE65E7B42 }}
 
-      # ✅ 3. Deploy the clean ZIP
-      - name: Deploy to Azure Web App
+      - name: Deploy
         uses: azure/webapps-deploy@v3
         with:
           app-name: enthashoppingundo
           package: "${{ github.workspace }}\site.zip"
-          slot-name: production
