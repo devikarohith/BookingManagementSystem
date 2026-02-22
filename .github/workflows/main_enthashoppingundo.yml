@@ -28,14 +28,9 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore DevikaBookingManagement.sln
 
-      # ✅ Publish to a known folder (avoids missing .pubxml issue)
+      # ✅ Publish to a relative folder called "publish"
       - name: Publish Web Project
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj ^
-          /p:Configuration=Release ^
-          /p:DeployOnBuild=true ^
-          /p:WebPublishMethod=FileSystem ^
-          /p:PublishUrl=$(System.DefaultWorkingDirectory)\publish ^
-          /p:DeleteExistingFiles=true
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=publish /p:DeleteExistingFiles=true
 
       - name: Show Publish Folder
         run: |
