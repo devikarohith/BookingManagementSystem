@@ -1,4 +1,7 @@
-name: Build and Deploy ASP.NET MVC to Azure Web App
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy ASP app to Azure Web App - enthashoppingundo
 
 on:
   push:
@@ -7,54 +10,45 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: windows-latest
-
     permissions:
-      id-token: write
-      contents: read
+      contents: read #This is required for actions/checkout
 
     steps:
-      # Checkout repo
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # Setup build tools
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.1
+      - name: Setup MSBuild path
+        uses: microsoft/setup-msbuild@v1.0.2
 
       - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1
+        uses: NuGet/setup-nuget@v1.0.5
 
-      # Restore solution (✅ correct path to .sln at repo root)
       - name: Restore NuGet packages
-        run: nuget restore DevikaBookingManagement.sln
+        run: nuget restore
 
-      # Build solution
-      - name: Build Solution
-        run: msbuild DevikaBookingManagement.sln /p:Configuration=Release
+      - name: Publish to folder
+        run: msbuild /nologo /verbosity:m /t:Build /t:pipelinePreDeployCopyAllFilesToOneFolder /p:_PackageTempDir="\published\"
 
-      # ✅ Publish using the Visual Studio publish profile
-      - name: Publish Web Project
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile="enthashoppingundo - Web Deploy"
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: ASP-app
+          path: '/published/**'
 
-      # Verify publish folder (default path when using .pubxml)
-      - name: Verify Publish Folder
-        run: |
-          if (Test-Path DevikaBookingManagement/bin/Release/Publish) {
-            dir DevikaBookingManagement/bin/Release/Publish
-          } else {
-            Write-Host "Publish folder not found."
-          }
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    permissions:
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
 
-      # Create ZIP for Azure deployment
-      - name: Create ZIP package
-        run: powershell Compress-Archive -Path "DevikaBookingManagement/bin/Release/Publish/*" -DestinationPath "DevikaBookingManagement/bin/Release/site.zip"
-
-      - name: Verify ZIP
-        run: dir DevikaBookingManagement/bin/Release/site.zip
-
-      # Azure Login
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: ASP-app
+      
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -62,9 +56,12 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B1031CB56AFC4975873A8B3CE92DC7AC }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3326E556FC4A4EFABA5C07FCE65E7B42 }}
 
-      # Deploy
       - name: Deploy to Azure Web App
+        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: enthashoppingundo
-          package: DevikaBookingManagement/bin/Release/site.zip
+          app-name: 'enthashoppingundo'
+          slot-name: 'Production'
+          package: .
+
+          
