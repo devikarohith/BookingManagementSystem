@@ -15,39 +15,47 @@ jobs:
       contents: read
 
     steps:
+      # Checkout repo
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Setup build tools
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.1
 
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
 
+      # Restore solution
       - name: Restore NuGet packages
         run: nuget restore DevikaBookingManagement.sln
 
-      # ✅ Publish to folder (NOT Package)
+      # Build solution
+      - name: Build Solution
+        run: msbuild DevikaBookingManagement.sln /p:Configuration=Release
+
+      # Publish Web Project to folder
       - name: Publish Web Project
         run: |
           msbuild DevikaBookingManagement/DevikaBookingManagement.csproj `
           /p:Configuration=Release `
           /p:DeployOnBuild=true `
           /p:WebPublishMethod=FileSystem `
-          /p:PublishUrl=publish `
+          /p:PublishUrl="${{ github.workspace }}\publish" `
           /p:DeleteExistingFiles=true
 
-      # ✅ Verify publish folder
+      # Verify publish folder
       - name: Verify Publish Folder
-        run: dir publish
+        run: dir "${{ github.workspace }}\publish"
 
-      # ✅ Create deployable ZIP
+      # Create ZIP for Azure deployment
       - name: Create ZIP package
-        run: powershell Compress-Archive -Path publish\* -DestinationPath site.zip
+        run: powershell Compress-Archive -Path "${{ github.workspace }}\publish\*" -DestinationPath "${{ github.workspace }}\site.zip"
 
       - name: Verify ZIP
-        run: dir site.zip
+        run: dir "${{ github.workspace }}\site.zip"
 
+      # Azure Login
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -55,8 +63,9 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B1031CB56AFC4975873A8B3CE92DC7AC }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3326E556FC4A4EFABA5C07FCE65E7B42 }}
 
+      # Deploy
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: enthashoppingundo
-          package: site.zip
+          package: "${{ github.workspace }}\\site.zip"
