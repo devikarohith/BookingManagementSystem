@@ -28,15 +28,9 @@ jobs:
       - name: Restore NuGet packages
         run: dotnet restore DevikaBookingManagement/DevikaBookingManagement.csproj
 
-      # ✅ Publish directly from Web project
+      # ✅ Publish directly from Web project (single line, no ^)
       - name: Publish Web Project
-        run: |
-          msbuild DevikaBookingManagement/DevikaBookingManagement.csproj ^
-            /p:Configuration=Release ^
-            /p:DeployOnBuild=true ^
-            /p:WebPublishMethod=FileSystem ^
-            /p:PublishUrl=publish ^
-            /p:DeleteExistingFiles=true
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=publish /p:DeleteExistingFiles=true
 
       - name: Show Publish Folder
         run: |
