@@ -154,6 +154,7 @@
     <Content Include="Scripts\bootstrap.esm.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <None Include="enthashoppingundo - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\enthashoppingundo - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\enthashoppingundo - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\enthashoppingundo - Web Deploy.pubxml" />
