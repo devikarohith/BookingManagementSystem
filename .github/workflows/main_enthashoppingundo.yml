@@ -30,15 +30,12 @@ jobs:
       - name: Build Solution
         run: msbuild DevikaBookingManagement.sln /p:Configuration=Release
 
-      # 🔥 Publish to Folder (NO Package method)
-      - name: Publish Web Project
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl="${{ github.workspace }}\publish" /p:DeleteExistingFiles=true /p:SkipInvalidConfigurations=true
+      # ✅ Create MSBuild Web Deploy package (NO pubxml needed)
+      - name: Create Web Package
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="${{ github.workspace }}\site.zip"
 
-      - name: Verify Publish Folder
-        run: dir "${{ github.workspace }}\publish"
-
-      - name: Create Clean ZIP
-        run: powershell Compress-Archive -Path "${{ github.workspace }}\publish\*" -DestinationPath "${{ github.workspace }}\site.zip"
+      - name: Verify ZIP
+        run: dir "${{ github.workspace }}\site.zip"
 
       - name: Login to Azure
         uses: azure/login@v2
