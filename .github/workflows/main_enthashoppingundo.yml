@@ -37,12 +37,7 @@ jobs:
       # Publish Web Project to folder
       - name: Publish Web Project
         run: |
-          msbuild DevikaBookingManagement/DevikaBookingManagement.csproj `
-              /p:DeployOnBuild=true `
-              /p:WebPublishMethod=FileSystem`
-              /p:Configuration=Release `
-              /p:WebPublishMethod=FileSystem `
-              /p:PublishUrl="${{ github.workspace }}\publish"
+         msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl="${{ github.workspace }}\publish" /p:DeleteExistingFiles=true
 
       # Verify publish folder
       - name: Verify Publish Folder
@@ -69,4 +64,5 @@ jobs:
         with:
           app-name: enthashoppingundo
           package: "${{ github.workspace }}\\site.zip"
+
 
