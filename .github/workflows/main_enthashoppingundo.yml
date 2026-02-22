@@ -26,10 +26,16 @@ jobs:
         run: nuget restore DevikaBookingManagement.sln
 
       - name: Publish
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishUrl="${{ github.workspace }}\publish" /p:WebPublishMethod=FileSystem /p:PackageAsSingleFile=false
+        run: |
+          msbuild DevikaBookingManagement/DevikaBookingManagement.csproj `
+          /p:Configuration=Release `
+          /p:DeployOnBuild=true `
+          /p:PublishUrl="publish" `
+          /p:WebPublishMethod=FileSystem `
+          /p:PackageAsSingleFile=false
 
       - name: Archive
-        run: Compress-Archive -Path "${{ github.workspace }}\publish\*" -DestinationPath "${{ github.workspace }}\site.zip" -Force
+        run: Compress-Archive -Path "DevikaBookingManagement/publish/*" -DestinationPath "site.zip" -Force
 
       - name: Login
         uses: azure/login@v2
@@ -38,9 +44,11 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B1031CB56AFC4975873A8B3CE92DC7AC }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3326E556FC4A4EFABA5C07FCE65E7B42 }}
 
+      
       - name: Deploy
         uses: azure/webapps-deploy@v3
         with:
           app-name: enthashoppingundo
-          package: "${{ github.workspace }}/site.zip"
+          package: "site.zip"
+
 
