@@ -10,10 +10,6 @@ jobs:
   build-and-deploy:
     runs-on: windows-latest
 
-    permissions:
-      id-token: write
-      contents: read
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,30 +20,21 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
 
-      # ✅ Restore packages.config style packages
-      # If you have a solution file, use that:
-      # run: nuget restore DevikaBookingManagement/DevikaBookingManagement.sln
-      # If no solution file, restore the project directory containing packages.config:
       - name: Restore NuGet packages
-        run: nuget restore DevikaBookingManagement/
+        run: nuget restore DevikaBookingManagement/DevikaBookingManagement.sln
 
       - name: Publish Web Project
         run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=publish /p:DeleteExistingFiles=true
 
       - name: Show Publish Folder
-        run: |
-          if (Test-Path publish) {
-            dir publish
-          } else {
-            Write-Host "Publish folder not found."
-          }
+        run: dir publish
 
       - name: Azure Login
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_665AAC9768764F6AA8CE3E2842F43BEB }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B1031CB56AFC4975873A8B3CE92DC7AC }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3326E556FC4A4EFABA5C07FCE65E7B42 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
