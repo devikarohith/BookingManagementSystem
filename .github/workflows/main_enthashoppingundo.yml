@@ -28,14 +28,14 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore DevikaBookingManagement.sln
 
-      # ✅ Publish to a relative folder called "publish"
+      # ✅ Publish using the Visual Studio publish profile
       - name: Publish Web Project
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=publish /p:DeleteExistingFiles=true
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile="enthashoppingundo - Web Deploy"
 
       - name: Show Publish Folder
         run: |
-          if (Test-Path publish) {
-            dir publish
+          if (Test-Path DevikaBookingManagement/bin/Release/Publish) {
+            dir DevikaBookingManagement/bin/Release/Publish
           } else {
             Write-Host "Publish folder not found."
           }
@@ -51,4 +51,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: enthashoppingundo
-          package: publish
+          package: DevikaBookingManagement/bin/Release/Publish
