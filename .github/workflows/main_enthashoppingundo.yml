@@ -24,9 +24,9 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
 
-      # ✅ Restore packages for the project instead of .sln
+      # ✅ Use dotnet restore for project-level restore
       - name: Restore NuGet packages
-        run: nuget restore DevikaBookingManagement/DevikaBookingManagement.csproj
+        run: dotnet restore DevikaBookingManagement/DevikaBookingManagement.csproj
 
       # ✅ Publish directly from Web project
       - name: Publish Web Project
