@@ -30,8 +30,14 @@ jobs:
 
       # ✅ Publish to a folder (avoids missing .pubxml issue)
       - name: Publish Web Project
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj
-
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj `
+          /p:Configuration=Release `
+          /p:DeployOnBuild=true `
+          /p:WebPublishMethod=Package `
+          /p:PackageAsSingleFile=true `
+          /p:PackageLocation="${{ github.workspace }}\app.zip"
+      - name: Check ZIP
+        run: dir
       - name: Show Publish Folder
         run: |
           if (Test-Path publish) {
@@ -51,6 +57,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: enthashoppingundo
-          package: publish
+          package: app.zip
+
 
 
