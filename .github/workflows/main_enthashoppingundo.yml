@@ -34,21 +34,25 @@ jobs:
       - name: Build Solution
         run: msbuild DevikaBookingManagement.sln /p:Configuration=Release
 
-      # Publish Web Project to folder
+      # ✅ Publish using the Visual Studio publish profile
       - name: Publish Web Project
-        run: |
-         msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl="${{ github.workspace }}\publish" /p:DeleteExistingFiles=true
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile="enthashoppingundo - Web Deploy"
 
-      # Verify publish folder
+      # Verify publish folder (default path when using .pubxml)
       - name: Verify Publish Folder
-        run: dir "${{ github.workspace }}\publish"
+        run: |
+          if (Test-Path DevikaBookingManagement/bin/Release/Publish) {
+            dir DevikaBookingManagement/bin/Release/Publish
+          } else {
+            Write-Host "Publish folder not found."
+          }
 
       # Create ZIP for Azure deployment
       - name: Create ZIP package
-        run: powershell Compress-Archive -Path "${{ github.workspace }}\publish\*" -DestinationPath "${{ github.workspace }}\site.zip"
+        run: powershell Compress-Archive -Path "DevikaBookingManagement/bin/Release/Publish/*" -DestinationPath "DevikaBookingManagement/bin/Release/site.zip"
 
       - name: Verify ZIP
-        run: dir "${{ github.workspace }}\site.zip"
+        run: dir DevikaBookingManagement/bin/Release/site.zip
 
       # Azure Login
       - name: Login to Azure
@@ -63,6 +67,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: enthashoppingundo
-          package: "${{ github.workspace }}\\site.zip"
-
-
+          package: DevikaBookingManagement/bin/Release/site.zip
