@@ -24,27 +24,29 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
 
-      # ✅ Restore packages using the solution file
       - name: Restore NuGet packages
         run: nuget restore DevikaBookingManagement.sln
 
-      # ✅ Publish to a folder (avoids missing .pubxml issue)
+      # ✅ Publish to folder (NOT Package)
       - name: Publish Web Project
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj `
+        run: |
+          msbuild DevikaBookingManagement/DevikaBookingManagement.csproj `
           /p:Configuration=Release `
           /p:DeployOnBuild=true `
-          /p:WebPublishMethod=Package `
-          /p:PackageAsSingleFile=true `
-          /p:PackageLocation="${{ github.workspace }}\app.zip"
-      - name: Check ZIP
-        run: dir
-      - name: Show Publish Folder
-        run: |
-          if (Test-Path publish) {
-            dir publish
-          } else {
-            Write-Host "Publish folder not found."
-          }
+          /p:WebPublishMethod=FileSystem `
+          /p:PublishUrl=publish `
+          /p:DeleteExistingFiles=true
+
+      # ✅ Verify publish folder
+      - name: Verify Publish Folder
+        run: dir publish
+
+      # ✅ Create deployable ZIP
+      - name: Create ZIP package
+        run: powershell Compress-Archive -Path publish\* -DestinationPath site.zip
+
+      - name: Verify ZIP
+        run: dir site.zip
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -57,7 +59,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: enthashoppingundo
-          package: app.zip
-
-
-
+          package: site.zip
