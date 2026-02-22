@@ -15,42 +15,47 @@ jobs:
       contents: read
 
     steps:
-      # Checkout
+      # Checkout repo
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Setup MSBuild
+      # Setup build tools
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.1
 
-      # Setup NuGet
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
 
-      # Restore NuGet packages
+      # Restore solution
       - name: Restore NuGet packages
         run: nuget restore DevikaBookingManagement.sln
 
-      # Build & Publish Web Project
-      - name: Build and Publish Web Project
+      # Build solution
+      - name: Build Solution
+        run: msbuild DevikaBookingManagement.sln /p:Configuration=Release
+
+      # Publish Web Project to folder
+      - name: Publish Web Project
         run: |
           msbuild DevikaBookingManagement/DevikaBookingManagement.csproj `
-          /t:Build;Publish `
           /p:Configuration=Release `
+          /p:DeployOnBuild=true `
           /p:WebPublishMethod=FileSystem `
-          /p:PublishUrl="${{ github.workspace }}\publish"
+          /p:PublishUrl="${{ github.workspace }}\publish" `
+          /p:DeleteExistingFiles=true
 
-      # Verify publish folder exists
+      # Verify publish folder
       - name: Verify Publish Folder
         run: dir "${{ github.workspace }}\publish"
 
-      # Create ZIP from publish folder
+      # Create ZIP for Azure deployment
       - name: Create ZIP package
-        run: powershell Compress-Archive `
-          -Path "${{ github.workspace }}\publish\*" `
-          -DestinationPath "${{ github.workspace }}\site.zip"
+        run: powershell Compress-Archive -Path "${{ github.workspace }}\publish\*" -DestinationPath "${{ github.workspace }}\site.zip"
 
-      # Login to Azure
+      - name: Verify ZIP
+        run: dir "${{ github.workspace }}\site.zip"
+
+      # Azure Login
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -58,7 +63,7 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B1031CB56AFC4975873A8B3CE92DC7AC }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3326E556FC4A4EFABA5C07FCE65E7B42 }}
 
-      # Deploy to Azure Web App
+      # Deploy
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
