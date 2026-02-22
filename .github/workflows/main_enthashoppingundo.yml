@@ -24,10 +24,10 @@ jobs:
         run: nuget restore DevikaBookingManagement.sln
 
       - name: Publish Web Project
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=publish /p:DeleteExistingFiles=true
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile="enthashoppingundo - Web Deploy"
 
       - name: Show Publish Folder
-        run: dir publish
+        run: dir DevikaBookingManagement/bin/Release/Publish
 
       - name: Azure Login
         uses: azure/login@v2
@@ -40,5 +40,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: enthashoppingundo
-          package: publish
-
+          package: DevikaBookingManagement/bin/Release/Publish
