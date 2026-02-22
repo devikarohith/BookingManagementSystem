@@ -1,0 +1,56 @@
+name: Build and Deploy ASP.NET MVC to Azure Web App
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1
+
+      # ✅ Restore packages.config style packages
+      # If you have a solution file, use that:
+      # run: nuget restore DevikaBookingManagement/DevikaBookingManagement.sln
+      # If no solution file, restore the project directory containing packages.config:
+      - name: Restore NuGet packages
+        run: nuget restore DevikaBookingManagement/
+
+      - name: Publish Web Project
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=publish /p:DeleteExistingFiles=true
+
+      - name: Show Publish Folder
+        run: |
+          if (Test-Path publish) {
+            dir publish
+          } else {
+            Write-Host "Publish folder not found."
+          }
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_665AAC9768764F6AA8CE3E2842F43BEB }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B1031CB56AFC4975873A8B3CE92DC7AC }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3326E556FC4A4EFABA5C07FCE65E7B42 }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: enthashoppingundo
+          package: publish
