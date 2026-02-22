@@ -30,22 +30,23 @@ jobs:
       - name: Build Solution
         run: msbuild DevikaBookingManagement.sln /p:Configuration=Release
 
-      - name: Publish Web Project
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile="enthashoppingundo - Web Deploy" /p:ExcludeFilesFromDeployment="enthashoppingundo - Web Deploy.pubxml.user"
+      # ✅ Publish to a local folder instead of Web Deploy
+      - name: Publish Web Project (FileSystem)
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl="publish" /p:DeleteExistingFiles=true
 
       - name: Verify Publish Folder
         run: |
-          if (Test-Path DevikaBookingManagement/bin/Release/Publish) {
-            dir DevikaBookingManagement/bin/Release/Publish
+          if (Test-Path publish) {
+            dir publish
           } else {
             Write-Host "Publish folder not found."
           }
 
       - name: Create ZIP package
-        run: powershell Compress-Archive -Path "DevikaBookingManagement/bin/Release/Publish/*" -DestinationPath "DevikaBookingManagement/bin/Release/site.zip"
+        run: powershell Compress-Archive -Path "publish/*" -DestinationPath "site.zip"
 
       - name: Verify ZIP
-        run: dir DevikaBookingManagement/bin/Release/site.zip
+        run: dir site.zip
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -58,4 +59,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: enthashoppingundo
-          package: DevikaBookingManagement/bin/Release/site.zip
+          package: site.zip
