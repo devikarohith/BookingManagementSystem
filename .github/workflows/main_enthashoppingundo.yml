@@ -30,13 +30,22 @@ jobs:
           msbuild DevikaBookingManagement/DevikaBookingManagement.csproj `
           /p:Configuration=Release `
           /p:DeployOnBuild=true `
-          /p:PublishUrl="publish" `
+          /p:DeployDefaultTarget=WebPublish `
           /p:WebPublishMethod=FileSystem `
+          /p:publishUrl="${{ github.workspace }}\publish" `
           /p:PackageAsSingleFile=false
 
-      - name: Archive
-        run: Compress-Archive -Path "DevikaBookingManagement/publish/*" -DestinationPath "site.zip" -Force
+      # 🔍 This step helps us see where the files actually are
+      - name: List Files (Debug)
+        run: |
+          echo "Checking Workspace Root:"
+          dir
+          echo "Checking for publish folder:"
+          if (Test-Path "${{ github.workspace }}\publish") { dir "${{ github.workspace }}\publish" } else { echo "Publish folder NOT found" }
 
+      - name: Archive
+        run: Compress-Archive -Path "${{ github.workspace }}\publish\*" -DestinationPath "site.zip" -Force
+     
       - name: Login
         uses: azure/login@v2
         with:
@@ -50,5 +59,6 @@ jobs:
         with:
           app-name: enthashoppingundo
           package: "site.zip"
+
 
 
