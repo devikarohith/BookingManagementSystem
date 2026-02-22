@@ -24,11 +24,14 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
 
-      # ✅ Restore packages.config style packages
+      # ✅ Restore packages depending on project type
+      # If you have a .sln file, restore that.
       - name: Restore NuGet packages
-        run: nuget restore DevikaBookingManagement/DevikaBookingManagement.csproj
+        run: nuget restore DevikaBookingManagement/DevikaBookingManagement.sln
 
-      # ✅ Publish Web Project
+      # If no .sln exists and only csproj + PackageReference is used, replace above with:
+      # run: dotnet restore DevikaBookingManagement/DevikaBookingManagement.csproj
+
       - name: Publish Web Project
         run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=publish /p:DeleteExistingFiles=true
 
