@@ -38,11 +38,10 @@ jobs:
       - name: Publish Web Project
         run: |
           msbuild DevikaBookingManagement/DevikaBookingManagement.csproj `
-          /p:Configuration=Release `
-          /p:DeployOnBuild=true `
-          /p:WebPublishMethod=FileSystem `
-          /p:PublishUrl="${{ github.workspace }}\publish" `
-          /p:DeleteExistingFiles=true
+              /t:Build;Publish `
+              /p:Configuration=Release `
+              /p:WebPublishMethod=FileSystem `
+              /p:PublishUrl="${{ github.workspace }}\publish"
 
       # Verify publish folder
       - name: Verify Publish Folder
