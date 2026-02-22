@@ -24,11 +24,11 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
 
-      # ✅ Use dotnet restore for project-level restore
+      # ✅ Restore packages.config style packages
       - name: Restore NuGet packages
-        run: dotnet restore DevikaBookingManagement/DevikaBookingManagement.csproj
+        run: nuget restore DevikaBookingManagement/DevikaBookingManagement.csproj
 
-      # ✅ Publish directly from Web project (single line, no ^)
+      # ✅ Publish Web Project
       - name: Publish Web Project
         run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=publish /p:DeleteExistingFiles=true
 
