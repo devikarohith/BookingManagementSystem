@@ -10,10 +10,6 @@ jobs:
   build-and-deploy:
     runs-on: windows-latest
 
-    permissions:
-      id-token: write
-      contents: read
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,12 +26,18 @@ jobs:
       - name: Build Solution
         run: msbuild DevikaBookingManagement.sln /p:Configuration=Release
 
-      # ✅ Create MSBuild Web Deploy package (NO pubxml needed)
-      - name: Create Web Package
-        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="${{ github.workspace }}\site.zip"
+      # ✅ Publish to folder instead of MSDeploy package
+      - name: Publish Web Project (FileSystem)
+        run: msbuild DevikaBookingManagement/DevikaBookingManagement.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl="publish" /p:DeleteExistingFiles=true
+
+      - name: Verify Publish Folder
+        run: dir publish
+
+      - name: Create ZIP package
+        run: powershell Compress-Archive -Path "publish/*" -DestinationPath "site.zip"
 
       - name: Verify ZIP
-        run: dir "${{ github.workspace }}\site.zip"
+        run: dir site.zip
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -48,4 +50,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: enthashoppingundo
-          package: "${{ github.workspace }}\\site.zip"
+          package: site.zip
