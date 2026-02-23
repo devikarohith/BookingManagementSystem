@@ -1,0 +1,60 @@
+trigger:
+- DevopsDeploy
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+# Pull your GitHub repo
+- checkout: self
+
+# Restore NuGet packages
+- task: NuGetToolInstaller@1
+
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
+
+# Build solution
+- task: VSBuild@1
+  inputs:
+    solution: '$(solution)'
+    msbuildArgs: '/p:Configuration=$(buildConfiguration)'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+# Run tests
+- task: VSTest@2
+  inputs:
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+# Publish project to folder
+- task: VSBuild@1
+  inputs:
+    solution: 'DevikaBookingManagement/DevikaBookingManagement.csproj'
+    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=$(Build.ArtifactStagingDirectory)/publish'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+# Archive publish folder
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/publish'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/site.zip'
+    replaceExistingArchive: true
+
+# Deploy to Azure Web App
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: 'AzureWebAppConnection'   # must match your service connection name
+    appName: 'enthashoppingundo'                 # your Web App name
+    appType: 'webApp'                            # REQUIRED: Windows Web App
+    package: '$(Build.ArtifactStagingDirectory)/site.zip'
