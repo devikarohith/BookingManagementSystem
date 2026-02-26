@@ -1,0 +1,40 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  # MUST match the name you gave in Step 1
+  serviceConnection: 'MyAzureConn' 
+  # MUST match your App Service name in the Azure Portal
+  appService: 'enthashoppingundo'
+
+steps:
+- task: NuGetToolInstaller@1
+  displayName: 'Install NuGet'
+
+- task: NuGetCommand@2
+  displayName: 'Restore Packages'
+  inputs:
+    restoreSolution: '$(solution)'
+
+- task: VSBuild@1
+  displayName: 'Build & Package'
+  inputs:
+    solution: '$(solution)'
+    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: AzureRmWebAppDeployment@4
+  displayName: 'Deploy to Azure'
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: '$(serviceConnection)'
+    appType: 'webApp'
+    WebAppName: '$(appService)'
+    packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
